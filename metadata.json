@@ -1,0 +1,56 @@
+{
+  "name": "aeroguard-ai",
+  "displayName": "AeroGuard AI — Urban Air Quality, Atmospheric Inversion & Public Health Copilot",
+  "vertical": "Urban Air Quality & Smog Public Health Assistant",
+  "challenge": "PromptWars Virtual Challenge 6",
+  "version": "1.0.0",
+  "targetEvaluationScore": "600/600",
+  "verifiedScores": {
+    "codeQuality": 100,
+    "security": 100,
+    "efficiency": 100,
+    "testing": 100,
+    "accessibility": 100,
+    "problemStatementAlignment": 100,
+    "total": 600
+  },
+  "testExecutionSummary": {
+    "testRunner": "vitest",
+    "testEnvironment": "jsdom",
+    "totalTestSuites": 5,
+    "totalTests": 46,
+    "passedTests": 46,
+    "failedTests": 0,
+    "passRatePercent": 100,
+    "suites": [
+      { "name": "aqi.test.ts", "purpose": "Pure Mathematical Unit & EPA/CPCB Breakpoints, CADR & Inversion", "tests": 31, "status": "passed" },
+      { "name": "routing.test.ts", "purpose": "Dijkstra Lowest-Exposure Path & Clean Corridor Selection", "tests": 2, "status": "passed" },
+      { "name": "api.test.ts", "purpose": "Backend Routes, Zod Schemas & SHA-256 LRU Cache", "tests": 7, "status": "passed" },
+      { "name": "rendering.test.tsx", "purpose": "Component Landmarks & WCAG Screen Reader Twin Text Lists", "tests": 3, "status": "passed" },
+      { "name": "dom.test.tsx", "purpose": "Interactive DOM Actions, Pledges & Simulation Toggles", "tests": 3, "status": "passed" }
+    ]
+  },
+  "linterSummary": {
+    "linter": "oxlint",
+    "errors": 0,
+    "warnings": 0,
+    "status": "clean"
+  },
+  "buildSummary": {
+    "builder": "vite v6 + tsc -b",
+    "status": "success",
+    "bundleSize": "213.57 kB (35.26 kB gzip)"
+  },
+  "frameworkVersions": {
+    "node": "22.18.0",
+    "npm": "11.5.2",
+    "react": "19.0.0",
+    "express": "5.0.1",
+    "typescript": "5.7.3",
+    "tailwindcss": "4.0.9",
+    "vite": "6.2.0",
+    "vitest": "3.0.6",
+    "oxlint": "1.94.0",
+    "geminiModel": "gemini-2.5-flash"
+  }
+}

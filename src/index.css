@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@media print {
+  nav, header, footer, button, select, input {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
