@@ -1,16 +1,21 @@
-export default function handler(_req: any, res: any) {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (_req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  return res.status(200).json({
+export default async function handler(_req: any, res?: any) {
+  const data = {
     status: 'ok',
     platform: 'AeroGuard AI Serverless Gateway',
     timestamp: Date.now(),
+  };
+
+  if (res && typeof res.status === 'function') {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    return res.status(200).json(data);
+  }
+
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
   });
 }

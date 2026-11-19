@@ -92,22 +92,36 @@ function getDeterministicPlan(persona: any, zone: any) {
   };
 }
 
-export default async function handler(req: any, res: any) {
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(req: any, res?: any) {
+  const sendJson = (status: number, data: any) => {
+    if (res && typeof res.status === 'function') {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.status(status).json(data);
+    }
+    return new Response(JSON.stringify(data), {
+      status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  };
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+  const method = req.method || (req.headers ? 'GET' : 'POST');
+  if (method === 'OPTIONS') {
+    if (res && typeof res.status === 'function') return res.status(200).end();
+    return new Response(null, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } });
   }
 
   let body = req.body;
-  if (typeof body === 'string') {
+  if (!body && typeof req.json === 'function') {
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
+    }
+  } else if (typeof body === 'string') {
     try {
       body = JSON.parse(body);
     } catch {
@@ -119,14 +133,14 @@ export default async function handler(req: any, res: any) {
 
   const cacheKey = hashObj({ p: persona?.id, z: zone?.zoneId, aqi: zone?.aqi, l: language });
   if (cache.has(cacheKey)) {
-    return res.status(200).json(cache.get(cacheKey)!.data);
+    return sendJson(200, cache.get(cacheKey)!.data);
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
     const fallback = getDeterministicPlan(persona, zone);
     cache.set(cacheKey, { data: fallback, time: Date.now() });
-    return res.status(200).json(fallback);
+    return sendJson(200, fallback);
   }
 
   try {
@@ -170,10 +184,10 @@ Return ONLY valid JSON matching this schema:
       source: 'gemini-live',
     };
     cache.set(cacheKey, { data: finalData, time: Date.now() });
-    return res.status(200).json(finalData);
+    return sendJson(200, finalData);
   } catch {
     const fallback = getDeterministicPlan(persona, zone);
     cache.set(cacheKey, { data: fallback, time: Date.now() });
-    return res.status(200).json(fallback);
+    return sendJson(200, fallback);
   }
 }
