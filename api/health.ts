@@ -14,6 +14,9 @@ export default async function handler(_req?: unknown, res?: ExpressLikeResponse)
 
   if (res && typeof res.status === 'function') {
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(data);
     return;
@@ -23,6 +26,9 @@ export default async function handler(_req?: unknown, res?: ExpressLikeResponse)
     status: 200,
     headers: {
       'Content-Type': 'application/json',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Access-Control-Allow-Origin': '*',
     },
   });

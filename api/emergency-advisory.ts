@@ -26,6 +26,9 @@ export default async function handler(req: ServerlessRequest, res?: ExpressLikeR
   const sendJson = (status: number, data: unknown): Response | void => {
     if (res && typeof res.status === 'function') {
       res.setHeader('Content-Type', 'application/json');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.status(status).json(data);
       return;
@@ -34,6 +37,9 @@ export default async function handler(req: ServerlessRequest, res?: ExpressLikeR
       status,
       headers: {
         'Content-Type': 'application/json',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Access-Control-Allow-Origin': '*',
       },
     });

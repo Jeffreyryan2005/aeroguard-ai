@@ -44,3 +44,10 @@ If you identify a security issue or vulnerability within AeroGuard AI, please re
    Configured via `express-rate-limit`: caps client requests to 45 per minute to prevent DoS attacks and external LLM quota exhaustion.
 6. **CWE-209 Safe Error Handling:**
    All internal server exceptions are captured by `safeErrorHandler` in `server/middleware.ts`. Stack traces and internal server paths are never exposed to clients; safe generic JSON error messages are returned.
+7. **OWASP Top 10 Header Hardening:**
+   Configured in `vercel.json` and all serverless responses (`api/*`):
+   - `X-Content-Type-Options: nosniff` (mitigates MIME type confusion)
+   - `X-Frame-Options: DENY` (prevents clickjacking)
+   - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (enforces HSTS)
+   - `Referrer-Policy: strict-origin-when-cross-origin` (prevents referrer leakage)
+   - `Permissions-Policy: camera=(), microphone=(), geolocation=()` (restricts privileged APIs)
