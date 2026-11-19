@@ -1,27 +1,39 @@
-import type { Request, Response } from 'express';
-import { validateZone, sanitizeText } from '../server/validators';
-import { getEmergencyAdvisoryText } from '../server/aiService';
-import { insightCache, hashPayload, pruneCache } from '../server/cache';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export default async function handler(req: Request, res: Response) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+export default async function handler(req: any, res: any) {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
-  const { zone, language = 'en' } = req.body || {};
-  if (!validateZone(zone)) {
-    return res.status(400).json({ error: 'Invalid zone telemetry payload' });
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      body = {};
+    }
   }
 
-  const cleanLang = sanitizeText(language, 10) || 'en';
-  const cacheKey = hashPayload({ type: 'advisory', zoneId: zone.zoneId, aqi: zone.aqi, cleanLang });
+  const { zone, language = 'en' } = body || {};
+  const fallback = `EMERGENCY SMOG ADVISORY (${zone?.name || 'Urban Zone'}): AQI has reached ${zone?.aqi || 380}. Nocturnal thermal inversion is trapping fine particulates at ground level. Vulnerable family members must stay indoors with HEPA air purification and avoid physical exertion until solar convection breakup midday.`;
 
-  if (insightCache.has(cacheKey)) {
-    return res.status(200).json({ advisory: insightCache.get(cacheKey)!.data });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    return res.status(200).json({ advisory: fallback });
   }
 
-  const advisory = await getEmergencyAdvisoryText(zone, cleanLang);
-  pruneCache();
-  insightCache.set(cacheKey, { data: advisory, cachedAt: Date.now() });
-  return res.status(200).json({ advisory });
+  try {
+    const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const prompt = `Write an official 3-sentence emergency smog public health advisory for ${zone?.name || 'City'} where AQI is ${zone?.aqi || 380} with active ground thermal inversion. Language: ${language}. Plain text only.`;
+    const response = await model.generateContent(prompt);
+    return res.status(200).json({ advisory: response.response.text().trim() });
+  } catch {
+    return res.status(200).json({ advisory: fallback });
+  }
 }

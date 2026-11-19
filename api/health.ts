@@ -1,11 +1,16 @@
-import type { Request, Response } from 'express';
-import { insightCache } from '../server/cache';
+export default function handler(_req: any, res: any) {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-export default function handler(_req: Request, res: Response) {
+  if (_req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   return res.status(200).json({
     status: 'ok',
-    uptime: Math.round(process.uptime()),
+    platform: 'AeroGuard AI Serverless Gateway',
     timestamp: Date.now(),
-    cacheEntries: insightCache.size,
   });
 }
