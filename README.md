@@ -3,6 +3,7 @@
 > **Built for PromptWars Virtual Challenge 6: Urban Air Quality Assistant**  
 > *Empowering vulnerable families and urban communities to navigate winter smog inversions through GenAI routines, low-cost IAQ hacks, and clean-corridor transit planning.*
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-aeroguard--ai--sand.vercel.app-0070f3?style=for-the-badge&logo=vercel&logoColor=white)](https://aeroguard-ai-sand.vercel.app)
 [![CI Pipeline](https://img.shields.io/badge/CI%20Pipeline-Passing-28a745?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/Jeffreyryan2005/aeroguard-ai/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React 19](https://img.shields.io/badge/React-19.0-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
