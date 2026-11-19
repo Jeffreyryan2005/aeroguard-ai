@@ -46,6 +46,7 @@ If you identify a security issue or vulnerability within AeroGuard AI, please re
    All internal server exceptions are captured by `safeErrorHandler` in `server/middleware.ts`. Stack traces and internal server paths are never exposed to clients; safe generic JSON error messages are returned.
 7. **OWASP Top 10 Header Hardening:**
    Configured in `vercel.json` and all serverless responses (`api/*`):
+   - `Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; ...` (mitigates XSS and data exfiltration)
    - `X-Content-Type-Options: nosniff` (mitigates MIME type confusion)
    - `X-Frame-Options: DENY` (prevents clickjacking)
    - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (enforces HSTS)

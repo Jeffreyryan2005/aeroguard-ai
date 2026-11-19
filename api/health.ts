@@ -17,6 +17,7 @@ export default async function handler(_req?: unknown, res?: ExpressLikeResponse)
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Content-Security-Policy', "default-src 'self'");
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(data);
     return;
@@ -29,6 +30,7 @@ export default async function handler(_req?: unknown, res?: ExpressLikeResponse)
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Content-Security-Policy': "default-src 'self'",
       'Access-Control-Allow-Origin': '*',
     },
   });
