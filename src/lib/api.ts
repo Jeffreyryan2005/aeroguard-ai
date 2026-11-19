@@ -1,13 +1,17 @@
 // ============================================================
 // src/lib/api.ts
 // Typed Client-Side API Service with Resilient Fallback Layer
+// Zero cross-boundary imports — 100% pure client module
 // Guarantees zero UI crashing even during serverless cold starts
 // ============================================================
 
 import type { UrbanZone, VulnerabilityPersona, GenAIRoutinePlan } from '../types';
-import { generateDeterministicPlan } from '../../server/aiService';
+import { generateDeterministicPlan } from './clinicalPlan';
 import { logger } from './logger';
 
+/**
+ * Fetches AI-generated daily schedule or falls back to client deterministic engine.
+ */
 export async function fetchRoutineInsights(
   persona: VulnerabilityPersona,
   zone: UrbanZone,
@@ -32,6 +36,9 @@ export async function fetchRoutineInsights(
   }
 }
 
+/**
+ * Fetches localized public health emergency advisory text.
+ */
 export async function fetchEmergencyAdvisory(
   zone: UrbanZone,
   language: string = 'en'
