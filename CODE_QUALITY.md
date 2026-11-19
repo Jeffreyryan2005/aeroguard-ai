@@ -16,6 +16,7 @@ src/
 ├── lib/
 │   ├── aqiCompute.ts   # Pure mathematical compute (EPA, CADR, Inversion, Dijkstra)
 │   ├── constants.ts    # Regional telemetry, personas, transits, translations
+│   ├── clinicalPlan.ts # Pure deterministic clinical schedule generator (shared logic)
 │   ├── logger.ts       # Structured sanitizing logger (zero raw console leaks)
 │   └── api.ts          # Resilient typed client API layer with fallback
 ├── context/

@@ -6,7 +6,26 @@
 
 ---
 
-## 1. Zero-Trust Architecture Principles
+## 1. Supported Versions
+
+| Version | Supported |
+|:---|:---:|
+| 1.2.x | :white_check_mark: |
+| 1.1.x | :white_check_mark: |
+| < 1.1.0 | :x: |
+
+---
+
+## 2. Vulnerability Reporting
+
+If you identify a security issue or vulnerability within AeroGuard AI, please report it responsibly:
+- Open a GitHub Private Vulnerability Report via the repository's Security tab.
+- Alternatively, submit details to the maintainer via GitHub Issues labeled with `security`.
+- Critical issues receive review and triage within 24 hours.
+
+---
+
+## 3. Zero-Trust Architecture Principles
 
 1. **Server-Side Only Gemini API Execution:**
    The Google Gemini API key (`GEMINI_API_KEY`) is stored strictly in server-side environment variables (`server.ts` / Vercel Serverless Functions). It is **never** bundled into the client-side JavaScript bundle, **never** exposed via `VITE_` public variables, and **never** committed to version control.
