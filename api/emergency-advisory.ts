@@ -1,11 +1,34 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export default async function handler(req: any, res?: any) {
-  const sendJson = (status: number, data: any) => {
+export interface ExpressLikeResponse {
+  status: (code: number) => ExpressLikeResponse;
+  json: (data: unknown) => void;
+  setHeader: (name: string, value: string) => void;
+  end: () => void;
+}
+
+export interface ServerlessRequest {
+  method?: string;
+  headers?: Record<string, string | string[] | undefined>;
+  body?: unknown;
+  json?: () => Promise<unknown>;
+}
+
+interface AdvisoryRequestBody {
+  zone?: {
+    name?: string;
+    aqi?: number;
+  };
+  language?: string;
+}
+
+export default async function handler(req: ServerlessRequest, res?: ExpressLikeResponse): Promise<Response | void> {
+  const sendJson = (status: number, data: unknown): Response | void => {
     if (res && typeof res.status === 'function') {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Access-Control-Allow-Origin', '*');
-      return res.status(status).json(data);
+      res.status(status).json(data);
+      return;
     }
     return new Response(JSON.stringify(data), {
       status,
@@ -18,11 +41,14 @@ export default async function handler(req: any, res?: any) {
 
   const method = req.method || (req.headers ? 'GET' : 'POST');
   if (method === 'OPTIONS') {
-    if (res && typeof res.status === 'function') return res.status(200).end();
+    if (res && typeof res.status === 'function') {
+      res.status(200).end();
+      return;
+    }
     return new Response(null, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } });
   }
 
-  let body = req.body;
+  let body: unknown = req.body;
   if (!body && typeof req.json === 'function') {
     try {
       body = await req.json();
@@ -37,7 +63,8 @@ export default async function handler(req: any, res?: any) {
     }
   }
 
-  const { zone, language = 'en' } = body || {};
+  const typedBody = (body as AdvisoryRequestBody) || {};
+  const { zone, language = 'en' } = typedBody;
   const fallback = `EMERGENCY SMOG ADVISORY (${zone?.name || 'Urban Zone'}): AQI has reached ${zone?.aqi || 380}. Nocturnal thermal inversion is trapping fine particulates at ground level. Vulnerable family members must stay indoors with HEPA air purification and avoid physical exertion until solar convection breakup midday.`;
 
   const apiKey = process.env.GEMINI_API_KEY;

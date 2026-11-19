@@ -2,6 +2,7 @@
 // src/App.tsx
 // Core Application Shell for AeroGuard AI
 // WCAG 2.2 AA Accessible Landmarks, Skip Links & Tab Panels
+// Enforces Error Boundary containment across all view modules
 // ============================================================
 
 import React from 'react';
@@ -9,6 +10,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Navigation/Header';
 import { TabNav } from './components/Navigation/TabNav';
 import { AlertBanner } from './components/shared/AlertBanner';
+import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { AirTelemetryDashboard } from './components/Dashboard/AirTelemetryDashboard';
 import { DailyRoutineOptimizer } from './components/Routine/DailyRoutineOptimizer';
 import { TransitPlanner } from './components/Transit/TransitPlanner';
@@ -40,13 +42,15 @@ const MainContent: React.FC = () => {
       {/* Tab Navigation */}
       <TabNav />
 
-      {/* Main Landmark */}
+      {/* Main Landmark with ErrorBoundary Containment */}
       <main id="main-content" role="main" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'telemetry' && <AirTelemetryDashboard />}
-        {activeTab === 'routine' && <DailyRoutineOptimizer />}
-        {activeTab === 'transit' && <TransitPlanner />}
-        {activeTab === 'iaq' && <IAQCenter />}
-        {activeTab === 'community' && <CommunityHub />}
+        <ErrorBoundary fallbackTitle="Module Render Error">
+          {activeTab === 'telemetry' && <AirTelemetryDashboard />}
+          {activeTab === 'routine' && <DailyRoutineOptimizer />}
+          {activeTab === 'transit' && <TransitPlanner />}
+          {activeTab === 'iaq' && <IAQCenter />}
+          {activeTab === 'community' && <CommunityHub />}
+        </ErrorBoundary>
       </main>
 
       {/* Accessible Footer */}
@@ -97,10 +101,11 @@ const MainContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
+    <ErrorBoundary fallbackTitle="Application Initialization Failed">
+      <AppProvider>
+        <MainContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 };
-
 export default App;

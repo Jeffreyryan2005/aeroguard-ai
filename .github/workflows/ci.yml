@@ -30,8 +30,11 @@ jobs:
       - name: Strict TypeScript Compilation
         run: npx tsc -b
 
-      - name: Execute Vitest Test Suite (Tiers 1-5)
+      - name: Execute Vitest Test Suite (Tiers 1-6)
         run: npm run test:run
+
+      - name: Verify Test Coverage
+        run: npm run test:coverage
 
       - name: Production Bundle Compilation
         run: npm run build

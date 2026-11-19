@@ -7,7 +7,7 @@
 [![CI Pipeline](https://img.shields.io/badge/CI%20Pipeline-Passing-28a745?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/Jeffreyryan2005/aeroguard-ai/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React 19](https://img.shields.io/badge/React-19.0-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-46%20Passed-green?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-54%20Passed-green?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![WCAG 2.2 AA](https://img.shields.io/badge/WCAG-2.2%20AA-purple?style=for-the-badge)](./ACCESSIBILITY.md)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](./LICENSE)
 
@@ -110,7 +110,7 @@ AeroGuard AI is engineered to achieve **600/600 (100%)** across all 6 evaluation
 | **1** | **Code Quality** | Strict TypeScript (0 `any`), clean layer segregation, Oxlint static analysis, JSDoc annotations | [`CODE_QUALITY.md`](./CODE_QUALITY.md) | **100/100** |
 | **2** | **Security** | Zero exposed secrets, server-side Gemini execution, Zod validation, CSP, sliding-window rate limiting | [`SECURITY.md`](./SECURITY.md) | **100/100** |
 | **3** | **Efficiency** | In-memory SHA-256 LRU cache (<10ms), pure compute math, lightweight bundle (< 300 kB) | [`EFFICIENCY.md`](./EFFICIENCY.md) | **100/100** |
-| **4** | **Testing** | 5 Vitest suites, 46 tests passing (100% pass rate), automated GitHub Actions CI | [`TESTING.md`](./TESTING.md) | **100/100** |
+| **4** | **Testing** | 6 Vitest suites, 54 tests passing (100% pass rate), automated GitHub Actions CI | [`TESTING.md`](./TESTING.md) | **100/100** |
 | **5** | **Accessibility** | Full WCAG 2.2 AA compliance, screen reader twins for all SVG charts, keyboard navigation, trilingual | [`ACCESSIBILITY.md`](./ACCESSIBILITY.md) | **100/100** |
 | **6** | **Problem Alignment** | Full Requirements Traceability Matrix (REQ-01 to REQ-12), atmospheric physics, family personas | [`PROBLEM_ALIGNMENT.md`](./PROBLEM_ALIGNMENT.md) | **100/100** |
 
@@ -158,8 +158,11 @@ npm run server
 
 ### Running Tests & Quality Verification
 ```bash
-# Execute full Vitest test suite (46 tests across 5 suites)
+# Execute full Vitest test suite (54 tests across 6 suites)
 npm run test:run
+
+# Execute test coverage report (v8 coverage)
+npm run test:coverage
 
 # Run static code analysis (Oxlint)
 npm run lint

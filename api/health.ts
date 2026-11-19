@@ -1,4 +1,11 @@
-export default async function handler(_req: any, res?: any) {
+export interface ExpressLikeResponse {
+  status: (code: number) => ExpressLikeResponse;
+  json: (data: unknown) => void;
+  setHeader: (name: string, value: string) => void;
+  end?: () => void;
+}
+
+export default async function handler(_req?: unknown, res?: ExpressLikeResponse): Promise<Response | void> {
   const data = {
     status: 'ok',
     platform: 'AeroGuard AI Serverless Gateway',
@@ -8,7 +15,8 @@ export default async function handler(_req: any, res?: any) {
   if (res && typeof res.status === 'function') {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json(data);
+    res.status(200).json(data);
+    return;
   }
 
   return new Response(JSON.stringify(data), {

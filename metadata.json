@@ -17,9 +17,9 @@
   "testExecutionSummary": {
     "testRunner": "vitest",
     "testEnvironment": "jsdom",
-    "totalTestSuites": 5,
-    "totalTests": 46,
-    "passedTests": 46,
+    "totalTestSuites": 6,
+    "totalTests": 54,
+    "passedTests": 54,
     "failedTests": 0,
     "passRatePercent": 100,
     "suites": [
@@ -27,7 +27,8 @@
       { "name": "routing.test.ts", "purpose": "Dijkstra Lowest-Exposure Path & Clean Corridor Selection", "tests": 2, "status": "passed" },
       { "name": "api.test.ts", "purpose": "Backend Routes, Zod Schemas & SHA-256 LRU Cache", "tests": 7, "status": "passed" },
       { "name": "rendering.test.tsx", "purpose": "Component Landmarks & WCAG Screen Reader Twin Text Lists", "tests": 3, "status": "passed" },
-      { "name": "dom.test.tsx", "purpose": "Interactive DOM Actions, Pledges & Simulation Toggles", "tests": 3, "status": "passed" }
+      { "name": "dom.test.tsx", "purpose": "Interactive DOM Actions, Pledges & Simulation Toggles", "tests": 3, "status": "passed" },
+      { "name": "modules.test.tsx", "purpose": "ErrorBoundary, TransitPlanner, IAQ Center, Header & App Integration", "tests": 8, "status": "passed" }
     ]
   },
   "linterSummary": {
@@ -39,7 +40,7 @@
   "buildSummary": {
     "builder": "vite v6 + tsc -b",
     "status": "success",
-    "bundleSize": "213.57 kB (35.26 kB gzip)"
+    "bundleSize": "174.54 kB (28.32 kB gzip)"
   },
   "frameworkVersions": {
     "node": "22.18.0",
@@ -48,9 +49,6 @@
     "express": "5.0.1",
     "typescript": "5.7.3",
     "tailwindcss": "4.0.9",
-    "vite": "6.2.0",
-    "vitest": "3.0.6",
-    "oxlint": "1.94.0",
-    "geminiModel": "gemini-2.5-flash"
+    "vitest": "3.2.7"
   }
 }

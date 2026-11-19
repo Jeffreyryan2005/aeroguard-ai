@@ -1,13 +1,31 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createHash } from 'crypto';
+import type { ExpressLikeResponse, ServerlessRequest } from './emergency-advisory';
 
-const cache = new Map<string, { data: any; time: number }>();
+interface RoutineRequestBody {
+  persona?: {
+    id?: string;
+    label?: string;
+    category?: string;
+  };
+  zone?: {
+    zoneId?: string;
+    name?: string;
+    aqi?: number;
+    inversion?: {
+      isInversionActive?: boolean;
+    };
+  };
+  language?: string;
+}
 
-function hashObj(obj: any): string {
+const cache = new Map<string, { data: unknown; time: number }>();
+
+function hashObj(obj: Record<string, unknown>): string {
   return createHash('sha256').update(JSON.stringify(obj)).digest('hex').slice(0, 16);
 }
 
-function getDeterministicPlan(persona: any, zone: any) {
+function getDeterministicPlan(persona?: RoutineRequestBody['persona'], zone?: RoutineRequestBody['zone']) {
   const isSevere = (zone?.aqi || 200) >= 300;
   const isInverted = zone?.inversion?.isInversionActive ?? true;
 
@@ -92,12 +110,13 @@ function getDeterministicPlan(persona: any, zone: any) {
   };
 }
 
-export default async function handler(req: any, res?: any) {
-  const sendJson = (status: number, data: any) => {
+export default async function handler(req: ServerlessRequest, res?: ExpressLikeResponse): Promise<Response | void> {
+  const sendJson = (status: number, data: unknown): Response | void => {
     if (res && typeof res.status === 'function') {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Access-Control-Allow-Origin', '*');
-      return res.status(status).json(data);
+      res.status(status).json(data);
+      return;
     }
     return new Response(JSON.stringify(data), {
       status,
@@ -110,11 +129,14 @@ export default async function handler(req: any, res?: any) {
 
   const method = req.method || (req.headers ? 'GET' : 'POST');
   if (method === 'OPTIONS') {
-    if (res && typeof res.status === 'function') return res.status(200).end();
+    if (res && typeof res.status === 'function') {
+      res.status(200).end();
+      return;
+    }
     return new Response(null, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } });
   }
 
-  let body = req.body;
+  let body: unknown = req.body;
   if (!body && typeof req.json === 'function') {
     try {
       body = await req.json();
@@ -129,65 +151,72 @@ export default async function handler(req: any, res?: any) {
     }
   }
 
-  const { persona, zone, language = 'en' } = body || {};
+  const typedBody = (body as RoutineRequestBody) || {};
+  const { persona, zone, language = 'en' } = typedBody;
+  const deterministic = getDeterministicPlan(persona, zone);
 
-  const cacheKey = hashObj({ p: persona?.id, z: zone?.zoneId, aqi: zone?.aqi, l: language });
-  if (cache.has(cacheKey)) {
-    return sendJson(200, cache.get(cacheKey)!.data);
+  const keyObj: Record<string, unknown> = {
+    p: persona?.id || 'default',
+    z: zone?.zoneId || 'default',
+    a: zone?.aqi || 0,
+    l: language,
+  };
+  const cKey = hashObj(keyObj);
+
+  const cached = cache.get(cKey);
+  if (cached && Date.now() - cached.time < 300000) {
+    return sendJson(200, cached.data);
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-    const fallback = getDeterministicPlan(persona, zone);
-    cache.set(cacheKey, { data: fallback, time: Date.now() });
-    return sendJson(200, fallback);
+    cache.set(cKey, { data: deterministic, time: Date.now() });
+    return sendJson(200, deterministic);
   }
 
   try {
     const ai = new GoogleGenerativeAI(apiKey);
     const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const prompt = `You are AeroGuard AI, an expert pulmonologist and atmospheric physicist.
-Produce a daily schedule for:
-Zone: ${zone?.name || 'City'} (AQI: ${zone?.aqi || 300}, Inversion Active: ${zone?.inversion?.isInversionActive})
-Persona: ${persona?.label || 'Resident'} (VE: ${persona?.respiratoryMinuteVol || 20} L/min)
+
+    const prompt = `You are a clinical environmental pulmonologist for AeroGuard AI.
+Generate a JSON daily routine for:
+Persona: ${persona?.label || 'General'}
+Zone: ${zone?.name || 'Urban Zone'}, AQI: ${zone?.aqi || 300}
+Thermal Inversion Active: ${zone?.inversion?.isInversionActive ?? true}
 Language: ${language}
 
 Return ONLY valid JSON matching this schema:
 {
-  "advisoryHeadline": "string",
-  "safeOutdoorWindow": "string",
-  "biomedicalSummary": "string",
-  "modeledInhaledDoseAvoidedUg": 220,
+  "personaId": "${persona?.id || 'asthmatic'}",
+  "zoneId": "${zone?.zoneId || 'delhi'}",
+  "currentAqi": ${zone?.aqi || 300},
+  "advisoryHeadline": "Short clear string",
+  "safeOutdoorWindow": "e.g. 1:00 PM - 3:30 PM",
   "hourlySchedule": [
     {
-      "timeSlot": "07:00 AM - 09:00 AM",
+      "timeSlot": "string",
       "activity": "string",
       "recommendedAction": "string",
-      "locationType": "indoor",
-      "riskScore": "high",
+      "locationType": "indoor" | "outdoor" | "transit",
+      "riskScore": "low" | "moderate" | "high" | "prohibited",
       "scientificRationale": "string",
       "impactMetric": "string"
     }
-  ]
+  ],
+  "biomedicalSummary": "Clinical explanation of particulate avoidance",
+  "modeledInhaledDoseAvoidedUg": 180
 }`;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const parsed = JSON.parse(cleanJson);
-    const finalData = {
-      ...parsed,
-      personaId: persona?.id || 'asthmatic',
-      zoneId: zone?.zoneId || 'delhi-anand-vihar',
-      currentAqi: zone?.aqi || 350,
-      generatedAt: new Date().toISOString(),
-      source: 'gemini-live',
-    };
-    cache.set(cacheKey, { data: finalData, time: Date.now() });
-    return sendJson(200, finalData);
+    const response = await model.generateContent(prompt);
+    const text = response.response.text().trim();
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed: unknown = JSON.parse(jsonMatch[0]);
+      cache.set(cKey, { data: parsed, time: Date.now() });
+      return sendJson(200, parsed);
+    }
+    return sendJson(200, deterministic);
   } catch {
-    const fallback = getDeterministicPlan(persona, zone);
-    cache.set(cacheKey, { data: fallback, time: Date.now() });
-    return sendJson(200, fallback);
+    return sendJson(200, deterministic);
   }
 }

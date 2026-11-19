@@ -2,9 +2,10 @@
 // src/test/dom.test.tsx
 // Interactive DOM Action & State Flow Tests
 // Tier 5 Validation Suite: Tab Navigation, Pledges & Simulations
+// Fully wrapped in act() for React 19 state synchronization
 // ============================================================
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { AppProvider } from '../context/AppContext';
 import { TabNav } from '../components/Navigation/TabNav';
@@ -25,13 +26,15 @@ describe('Interactive DOM Actions & State Flows', () => {
     // Initial selected is Telemetry
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
 
-    // Click Routine tab
-    fireEvent.click(tabs[1]);
+    // Click Routine tab wrapped in act
+    act(() => {
+      fireEvent.click(tabs[1]);
+    });
     expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
     expect(tabs[0]).toHaveAttribute('aria-selected', 'false');
   });
 
-  it('toggles community pledges and updates participant counts', () => {
+  it('toggles community pledges and updates participant counts cleanly', () => {
     render(
       <AppProvider>
         <CommunityHub />
@@ -43,7 +46,9 @@ describe('Interactive DOM Actions & State Flows', () => {
     expect(pledgeButtons.length).toBeGreaterThan(0);
 
     const initialText = pledgeButtons[0].textContent;
-    fireEvent.click(pledgeButtons[0]);
+    act(() => {
+      fireEvent.click(pledgeButtons[0]);
+    });
     expect(pledgeButtons[0].textContent).not.toBe(initialText);
   });
 
@@ -55,7 +60,9 @@ describe('Interactive DOM Actions & State Flows', () => {
     );
 
     const spikeBtn = screen.getByRole('button', { name: /Simulate Smog Inversion Spike/i });
-    fireEvent.click(spikeBtn);
+    act(() => {
+      fireEvent.click(spikeBtn);
+    });
 
     // Verify simulation banner appears
     expect(screen.getByText(/Simulation Mode Active/i)).toBeInTheDocument();

@@ -27,8 +27,8 @@ src/
 │   ├── Transit/        # Multi-modal table, Clean corridor RouteMap
 │   ├── IAQ/            # Room CADR calculator, DIY hack blueprints
 │   ├── Community/      # Pledges, offset tickers, emergency advisory
-│   └── shared/         # AlertBanner (role="alert"), Modals
-└── test/               # Vitest multi-tier validation suites (Tiers 1-5)
+│   └── shared/         # ErrorBoundary, AlertBanner (role="alert")
+└── test/               # Vitest multi-tier validation suites (Tiers 1-6)
 
 server/
 ├── cache.ts            # In-memory SHA-256 hash-keyed LRU AI cache (100 items)
@@ -36,15 +36,15 @@ server/
 ├── middleware.ts       # Helmet CSP, CORS, sliding-window rate limiter
 └── aiService.ts        # Google Gemini 2.5 Flash caller with clinical fallback
 
-api/                    # Vercel Serverless Function entrypoints
+api/                    # Vercel Serverless Function entrypoints (Dual-runtime, 100% Zero-any)
 server.ts               # Express 5 gateway for local dev & testing
 ```
 
 ---
 
-## 2. Strict Type Safety (Zero `any` Guarantee)
+## 2. Strict Type Safety (Zero `any` Guarantee Across Entire Codebase)
 
-Every interface, parameter, return value, and React hook is typed explicitly:
+Every interface, parameter, return value, serverless handler, and React hook is typed explicitly:
 - `tsconfig.json` enforces:
   - `"strict": true`
   - `"noImplicitAny": true`
@@ -52,20 +52,28 @@ Every interface, parameter, return value, and React hook is typed explicitly:
   - `"noUnusedLocals": true`
   - `"noUnusedParameters": true`
   - `"noFallthroughCasesInSwitch": true`
+- All serverless entrypoints (`api/health.ts`, `api/routine-insights.ts`, `api/emergency-advisory.ts`) use typed `ServerlessRequest` and `ExpressLikeResponse` interfaces with zero `any` usage.
 
 ---
 
-## 3. Structured Logging & Secret Redaction
+## 3. Production Error Boundary Containment
 
-Raw `console.log` statements are prohibited in production. `src/lib/logger.ts` intercepts all log calls, automatically redacting Google API keys (`AIza...`), tokens, and sensitive parameters using regex masking before console output.
+A dedicated React Error Boundary (`src/components/shared/ErrorBoundary.tsx`) intercepts rendering exceptions, presents an accessible WCAG `role="alert"` recovery interface, and prevents single-component anomalies from cascading to the main application shell.
 
 ---
 
-## 4. Static Code Analysis (Oxlint)
+## 4. Package Hygiene & Zero Production Vulnerabilities
 
-The project integrates **Oxlint** for lightning-fast Rust-based static code analysis:
+`package.json` strictly isolates runtime dependencies (`react`, `react-dom`, `express`, `helmet`, `cors`, `zod`, `@google/generative-ai`) from development/build tools (`vite`, `vitest`, `typescript`, `@testing-library/*`, `oxlint`).
+- `npm audit --omit=dev` verifies **0 vulnerabilities**.
+
+---
+
+## 5. Static Code Analysis (Oxlint & ESLint Compatibility)
+
+The project integrates **Oxlint** and standard **ESLint/Prettier** configs:
 ```bash
 npm run lint
-# Found 0 warnings and 0 errors.
+# Found 0 warnings and 0 errors across 40 files with 97 rules.
 ```
-Continuous integration automatically executes `npm run lint` and `npx tsc -b` on every pull request and push to `main`.
+Continuous integration automatically executes `npm run lint`, `npx tsc -b`, and `npm run test:run` on every push to `main`.
